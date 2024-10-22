@@ -1,0 +1,74 @@
+---
+- name: Install docker packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    - software-properties-common
+  tags:
+    - docker
+
+- name: Add Docker official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags:
+    - docker
+
+- name: Verify that we have the key with the fingerprint
+  apt_key:
+    id: 0EBFCD88
+    state: present
+  tags:
+    - docker
+
+- name: Set up the stable repository
+  apt_repository:
+    repo: deb [arch={{ arch }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable
+    state: present
+    update_cache: yes
+  tags:
+    - docker
+
+- name: Update apt packages
+  apt:
+    update_cache: yes
+  tags:
+    - docker
+
+- name: Install docker
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+  tags:
+    - docker
+
+- name: Install docker compose plugin
+  apt:
+    name: docker-compose-plugin
+    state: present
+    update_cache: yes
+  tags:
+    - docker
+
+# - name: Add remote "ubuntu" user to "docker" group
+#   remote_user: ubuntu
+#   user:
+#     name: "ubuntu"
+#     group: "docker"
+#     append: yes
+#   tags:
+#     - docker
+
+- name: Enable docker service and ensure it is not masked
+  ansible.builtin.systemd:
+    name: docker
+    enabled: yes
+    masked: no

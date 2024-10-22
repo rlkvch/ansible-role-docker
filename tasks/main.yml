@@ -1,0 +1,5 @@
+---
+- name: Install docker and docker-compose to host
+  import_tasks: debian.yml
+  when:
+    - ansible_facts['distribution'] == "Ubuntu"
